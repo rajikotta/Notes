@@ -2,6 +2,7 @@ package com.raji.notes.controller
 
 import com.raji.notes.database.models.Note
 import com.raji.notes.database.repository.NotesRepository
+import jakarta.validation.constraints.NotBlank
 import org.bson.types.ObjectId
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -22,7 +23,7 @@ class NoteController(val repository: NotesRepository) {
 
     data class NoteRequest(
         val id: String?,
-        val title: String,
+        @field:NotBlank(message = "Title cannot be null") val title: String,
         val content: String,
         val color: Long,
     )
