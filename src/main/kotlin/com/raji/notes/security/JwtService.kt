@@ -14,7 +14,7 @@ class JwtService(@Value("\${jwt.secret}") private val jwtSecret: String) {
     private val secretKey = Keys.hmacShaKeyFor(Base64.getDecoder().decode(jwtSecret.toByteArray()))
 
     private val accessTokenValidityMs = 15L * 60L * 1000L
-    private val refreshTokenValidityMs = 30L * 60L * 1000L
+     val refreshTokenValidityMs = 30L * 60L * 1000L
 
 
     private fun generateToken(userID: String, type: String, expiry: Long): String {

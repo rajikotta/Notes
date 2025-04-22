@@ -3,6 +3,8 @@ package com.raji.notes.controller
 import com.raji.notes.database.models.Note
 import com.raji.notes.database.repository.NotesRepository
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -35,6 +37,7 @@ class NoteController(val repository: NotesRepository) {
 
     @PostMapping
     fun saveNote(@RequestBody body: NoteRequest): NoteResponse {
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
 
         val note = repository.save(
             Note(
@@ -43,29 +46,36 @@ class NoteController(val repository: NotesRepository) {
                 content = body.content,
                 color = body.color,
                 createdAt = Instant.now(),
-                ownerId = ObjectId()
+                ownerId = ObjectId(ownerId)
             ))
         return note.toResponse()
     }
 
     @GetMapping
-    fun getNotesByOwnerID(@RequestParam(required = true) ownerId: String): List<NoteResponse> {
-
+    fun getNotesByOwnerID(): List<NoteResponse> {
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         return repository.findByOwnerId(ObjectId(ownerId)).map { it.toResponse() }
     }
 
     @DeleteMapping(path = ["/{id}"])
     fun deleteNote(@PathVariable id: String) {
-        repository.deleteById(ObjectId(id))
-    }
-}
 
-private fun Note.toResponse(): NoteController.NoteResponse {
-    return NoteController.NoteResponse(
-        id = id.toHexString(),
-        title = title,
-        content = content,
-        color = color,
-        createdAt = createdAt
-    )
+        val note = repository.findById(ObjectId(id)).orElseThrow {
+            IllegalArgumentException("Note not found")
+        }
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
+        if (note.ownerId.toHexString() == ownerId) {
+            repository.deleteById(ObjectId(id))
+        }
+    }
+
+    private fun Note.toResponse(): NoteController.NoteResponse {
+        return NoteController.NoteResponse(
+            id = id.toHexString(),
+            title = title,
+            content = content,
+            color = color,
+            createdAt = createdAt
+        )
+    }
 }
