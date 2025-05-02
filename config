@@ -1,0 +1,5 @@
+Host notes
+    HostName 91.99.73.245
+    User admin
+    IdentityFile ~/.ssh/notes
+    IdentitiesOnly yes
