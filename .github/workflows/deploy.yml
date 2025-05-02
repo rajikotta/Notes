@@ -3,7 +3,7 @@ name: Deploy Notes Backend
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
